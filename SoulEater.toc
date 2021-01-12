@@ -1,0 +1,9 @@
+## Interface: 90002
+## Title: SOULEATER
+## Author: Labmixz - US Stormrage 
+## Version: 0.0.1
+## Notes: This addon will help manage alert battle rez spells, mainly focusing on Warlock soulstones.
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariablesPerCharacter: SOULEATER, SOULEATERMode
+SoulEater.lua
