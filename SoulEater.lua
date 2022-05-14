@@ -49,11 +49,31 @@ local brSpells = {
 	[54732] = true, 	-- Engineering, Defibrillate
 	[348479] = true, 	-- Engineering, Unstable Temporal Time Shifter
 	[348477] = true, 	-- Engineering, Disposable Spectrophasic Reanimator
-	[5697] = true, 		-- Testing, Unending Breath
 }
 
 local wipeProtection = {
 	["Soulstone"] = true, -- Warlock Soulstone
+}
+
+local stunSpells = {
+	[30283] = true,		-- Warlock, Shadowfury
+}
+
+local ccSpells = {
+	[710] = true,		-- Warlock, Banish
+	[5782] = true,		-- Warlock, Fear
+	[6789] = true,		-- Warlock, Mortal Coil
+}
+
+local curseSpells = {
+	[702] = true,		-- Curse of Weakness
+	[1714] = true,		-- Curse of Tongues
+	[334275] = true,	-- Curse of Exhaustion
+}
+
+local helpfulSpells = {
+	[29893] = true, 	-- Create Soulwell
+	[698] = true,		-- Riutal of Summoning
 }
 
 frame:RegisterEvent("ADDON_LOADED")
@@ -104,26 +124,59 @@ frame:SetScript("OnEvent", function(self, event, ...)
 		end
 
 		if ssCount > 0 and hasWarlock then
-			SoulEaterAnnounce("{triangle}SoulEater{triangle}: Soulstone found, wipe recovery is GOOD!")
+			SoulEaterAnnounce("[SE]: Soulstone found, wipe recovery is {triangle}{triangle}GOOD{triangle}{triangle}!")
 		elseif ssCount <= 0 and hasWarlock then
-			SoulEaterAnnounce("{cross}SoulEater{cross}: Soulstone NOT found; Warlock SS someone before pull!!")
+			SoulEaterAnnounce("[SE]: {cross}{cross}Soulstone NOT found; Warlock SS someone before pull!{cross}{cross}")
 		else
 			print("SoulEater - There is currently no Warlock found in party/raid.")
 		end
 	else
 		local _, event, _, _, sourceName, _, _, _, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()		
 		local gNum=GetNumGroupMembers()
-		local incombat = UnitAffectingCombat("player")
+		local incombat = InCombatLockdown()
+		if !incombat then
+			incombat = UnitAffectingCombat("party1")
+		end
+		
+		if !incombat then
+			incombat = UnitAffectingCombat("player")
+		end
+
+		-- Check for BR Spells
 		if SeState and brSpells[spellID] and gNum > 0 and (event=="SPELL_CAST_SUCCESS") then
 			if (UnitPlayerOrPetInParty(sourceName) or UnitPlayerOrPetInRaid(sourceName)) then
 				if UnitIsPlayer(sourceName) then
 					if incombat then
-						SoulEaterAnnounce("{skull}SoulEater{skull}: "..sourceName.." is resurrecting "..destName.." with "..GetSpellLink(spellID).."!")
+						SoulEaterAnnounce("[SE]: "..sourceName.." is resurrecting "..destName.." with {skull}"..GetSpellLink(spellID).."{skull}!")
 					else
-						SoulEaterAnnounce("{skull}SoulEater{skull}: "..sourceName.." setup wipe recovery on "..destName.." with "..GetSpellLink(spellID).."!")
+						SoulEaterAnnounce("[SE]: "..sourceName.." setup wipe recovery on "..destName.." with {skull}"..GetSpellLink(spellID).."{skull}!")
 					end
 				end
 			end
+		end
+
+		-- Check for CC Spells
+		if SeState and ccSpells[spellID] and gNum > 0 and (event=="SPELL_CAST_SUCCESS") then
+			SoulEaterAnnounce("[SE]: "..sourceName.." casted {moon}"..GetSpellLink(spellID).."{moon} on "..destName.."!")
+		end
+
+		-- Check for Curse Spells
+		if SeState and curseSpells[spellID] and gNum > 0 and (event=="SPELL_CAST_SUCCESS") then
+			SoulEaterAnnounce("[SE]: "..sourceName.." cursed "..destName.." with {cross}"..GetSpellLink(spellID).."{cross}!")
+		end
+
+		-- Check for Helpful Spells
+		if SeState and helpfulSpells[spellID] and gNum > 0 and (event=="SPELL_CAST_SUCCESS") then
+			if spellID == 698 then 
+				SoulEaterAnnounce("[SE]: "..sourceName.." is casting "..GetSpellLink(spellID).." {star}{star}{star}Please Click{star}{star}{star}")
+			else
+				SoulEaterAnnounce("[SE]: "..sourceName.." put down {circle}{circle}{circle}"..GetSpellLink(spellID).."{circle}{circle}{circle}")
+			end
+		end
+
+		-- Check for Stun Spells
+		if SeState and stunSpells[spellID] and gNum > 0 and (event=="SPELL_CAST_SUCCESS") then
+			SoulEaterAnnounce("[SE]: "..sourceName.." stunned with {diamond}"..GetSpellLink(spellID).."{diamond}!")
 		end
 	end
 end)
