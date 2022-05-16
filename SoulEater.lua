@@ -133,14 +133,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
 	else
 		local _, event, _, _, sourceName, _, _, _, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()		
 		local gNum=GetNumGroupMembers()
-		local incombat = InCombatLockdown()
-		if !incombat then
-			incombat = UnitAffectingCombat("party1")
-		end
-		
-		if !incombat then
-			incombat = UnitAffectingCombat("player")
-		end
+		local incombat=UnitAffectingCombat("player")
 
 		-- Check for BR Spells
 		if SeState and brSpells[spellID] and gNum > 0 and (event=="SPELL_CAST_SUCCESS") then
